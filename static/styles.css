@@ -1,0 +1,73 @@
+/* Mobile-first, tap-friendly styles */
+:root {
+  --bg: #0c0c0c;
+  --fg: #f3f3f3;
+  --muted: #adadad;
+  --accent: #2dd4bf;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+button { font: inherit; }
+
+#app { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
+
+.topbar, .bottombar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(10px + var(--safe-top)) 16px 10px 16px;
+  background: rgba(255,255,255,0.03); backdrop-filter: blur(6px);
+  position: sticky; top: 0;
+}
+.bottombar {
+  position: sticky; bottom: 0;
+  padding: 10px 16px calc(10px + var(--safe-bottom)) 16px;
+}
+
+.brand { font-weight: 700; letter-spacing: 0.3px; }
+.ghost {
+  color: var(--muted); background: transparent; border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 12px; border-radius: 14px;
+}
+
+.card-area {
+  display: grid; place-items: center; text-align: center;
+  padding: 8vh 16px;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  position: relative;
+}
+
+.english {
+  font-weight: 700;
+  line-height: 1.25;
+  font-size: clamp(22px, 4.8vw, 38px);
+  letter-spacing: 0.6px;
+  white-space: pre-wrap;
+  transition: opacity 0.12s ease;
+}
+.silhouette { color: #111; text-shadow: 0 0 0 #111; }
+.answer { position: absolute; opacity: 0; top: 12%; left: 50%; transform: translateX(-50%); width: 92%; }
+.reveal .answer { opacity: 1; }
+.reveal .silhouette { opacity: 0; }
+
+.korean {
+  margin-top: 22vh;
+  font-size: clamp(18px, 4vw, 26px);
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.bottombar .nav {
+  background: var(--accent); color: #04110f; border: none; border-radius: 16px; padding: 12px 18px; font-weight: 700;
+  box-shadow: 0 6px 20px rgba(45, 212, 191, 0.25);
+}
+.status { color: var(--muted); font-size: 14px; }
+
+/* Larger screens */
+@media (min-width: 800px) {
+  .english { font-size: clamp(28px, 2.6vw, 44px); }
+  .korean { font-size: clamp(22px, 2.2vw, 28px); }
+}
