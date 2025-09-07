@@ -15,7 +15,10 @@
   <div id="app">
     <header class="topbar">
       <div class="brand">영어 학습</div>
-      <button id="shuffleBtn" class="ghost">셔플</button>
+      <div class="toolbar">
+        <button id="shuffleBtn" class="ghost">셔플</button>
+        <button id="themeBtn" class="ghost" aria-pressed="false" aria-label="테마 전환">라이트</button>
+      </div>
     </header>
 
     <main id="tapArea" class="card-area" tabindex="0" aria-label="정답 보기 영역(터치&홀드)">
@@ -33,7 +36,6 @@
 
   <script src="/app.js"></script>
   <script>
-    // Register service worker for offline support
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(console.warn);

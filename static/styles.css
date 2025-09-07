@@ -1,11 +1,31 @@
-/* Mobile-first, tap-friendly styles */
+/* Mobile-first, tap-friendly styles with theme support */
 :root {
+  --radius: 16px;
+}
+
+/* Dark theme (default) */
+:root,
+:root[data-theme="dark"] {
   --bg: #0c0c0c;
   --fg: #f3f3f3;
   --muted: #adadad;
-  --accent: #2dd4bf;
-  --safe-top: env(safe-area-inset-top);
-  --safe-bottom: env(safe-area-inset-bottom);
+  --accent: #2dd4bf;     /* teal button */
+  --accent-fg: #04110f;  /* button text on dark */
+  --bar: rgba(255,255,255,0.04);
+  --shadow: 0 6px 20px rgba(45,212,191,0.25);
+  --silhouette: var(--muted); /* silhouette color close to Korean text */
+}
+
+/* Light theme */
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #0b0b0b;
+  --muted: #4b5563;
+  --accent: #2563eb;     /* blue button */
+  --accent-fg: #ffffff;  /* button text on light */
+  --bar: rgba(0,0,0,0.04);
+  --shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+  --silhouette: var(--muted);
 }
 
 * { box-sizing: border-box; }
@@ -17,18 +37,21 @@ button { font: inherit; }
 
 .topbar, .bottombar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: calc(10px + var(--safe-top)) 16px 10px 16px;
-  background: rgba(255,255,255,0.03); backdrop-filter: blur(6px);
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px 16px;
+  background: var(--bar); backdrop-filter: blur(6px);
   position: sticky; top: 0;
+  border-bottom: 1px solid rgba(127,127,127,0.12);
 }
 .bottombar {
   position: sticky; bottom: 0;
-  padding: 10px 16px calc(10px + var(--safe-bottom)) 16px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) 16px;
+  border-top: 1px solid rgba(127,127,127,0.12);
 }
 
 .brand { font-weight: 700; letter-spacing: 0.3px; }
+.toolbar { display: flex; gap: 8px; align-items: center; }
 .ghost {
-  color: var(--muted); background: transparent; border: 1px solid rgba(255,255,255,0.2);
+  color: var(--muted); background: transparent; border: 1px solid rgba(127,127,127,0.28);
   padding: 8px 12px; border-radius: 14px;
 }
 
@@ -48,7 +71,8 @@ button { font: inherit; }
   white-space: pre-wrap;
   transition: opacity 0.12s ease;
 }
-.silhouette { color: #111; text-shadow: 0 0 0 #111; }
+/* Silhouette now uses a theme variable so it stays visible on both themes */
+.silhouette { color: var(--silhouette); text-shadow: 0 0 0 var(--silhouette); }
 .answer { position: absolute; opacity: 0; top: 12%; left: 50%; transform: translateX(-50%); width: 92%; }
 .reveal .answer { opacity: 1; }
 .reveal .silhouette { opacity: 0; }
@@ -61,8 +85,8 @@ button { font: inherit; }
 }
 
 .bottombar .nav {
-  background: var(--accent); color: #04110f; border: none; border-radius: 16px; padding: 12px 18px; font-weight: 700;
-  box-shadow: 0 6px 20px rgba(45, 212, 191, 0.25);
+  background: var(--accent); color: var(--accent-fg); border: none; border-radius: 16px; padding: 12px 18px; font-weight: 700;
+  box-shadow: var(--shadow);
 }
 .status { color: var(--muted); font-size: 14px; }
 

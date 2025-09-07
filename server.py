@@ -1,11 +1,4 @@
-# server.py
-# FastAPI server that serves a mobile-optimized PWA for English practice.
-# Usage:
-#   1) Put your CSV at data/cards.csv (headers: en,ko), or set CSV_PATH env var.
-#   2) python3 -m pip install fastapi uvicorn
-#   3) python3 server.py
-#   4) Visit http://<Mac-mini-IP>:8000 on your phone.
-
+# server.py (v2 with theming-ready frontend)
 import csv
 import io
 import os
@@ -24,15 +17,11 @@ CSV_PATH = os.environ.get("CSV_PATH", "data/cards.csv")
 ETAG = ""
 
 def _parse_csv_text(text: str) -> List[Dict[str, str]]:
-    # Try to parse with headers first.
     out = []
     sio = io.StringIO(text)
     reader = csv.DictReader(sio)
-    # Accept flexible header names
-    header_map = None
     if reader.fieldnames:
         lowered = [h.strip().lower() for h in reader.fieldnames]
-        # Determine likely columns
         en_key = None
         ko_key = None
         for idx, name in enumerate(lowered):
@@ -46,15 +35,12 @@ def _parse_csv_text(text: str) -> List[Dict[str, str]]:
                 ko = (row.get(ko_key) or "").strip()
                 if en and ko:
                     out.append({"en": en, "ko": ko})
-            if out:
-                return out
+            if out: return out
 
-    # Fallback: assume two columns without headers, EN first, KO second
     sio.seek(0)
     reader2 = csv.reader(sio)
     for i, row in enumerate(reader2):
         if i == 0 and len(row) == 2 and ("en" in row[0].lower() or "ko" in row[1].lower()):
-            # It was probably a header; skip (already tried DictReader above)
             continue
         if len(row) >= 2:
             en = row[0].strip()
@@ -86,12 +72,10 @@ def startup():
 
 @app.get("/api/cards")
 def get_cards():
-    # Return all cards with a simple ETag for caching.
     resp = JSONResponse({"cards": CARDS, "count": len(CARDS), "etag": ETAG})
     resp.headers["ETag"] = ETAG
     return resp
 
-# Serve static SPA & PWA
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":

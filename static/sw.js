@@ -1,5 +1,5 @@
 // Minimal service worker for offline shell
-const CACHE = "eng-trainer-v1";
+const CACHE = "eng-trainer-v2-fresh2";
 const ASSETS = [
   "/",
   "/index.html",
@@ -28,7 +28,6 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(request).then(cached => {
       return cached || fetch(request).catch(() => {
-        // Offline fallback: return shell if navigating
         if (request.mode === "navigate") return caches.match("/");
       });
     })

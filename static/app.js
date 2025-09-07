@@ -1,4 +1,4 @@
-/* Core SPA logic: fetch cards, show silhouette, hold-to-reveal, prev/next. */
+/* Core SPA logic: fetch cards, show silhouette, hold-to-reveal, prev/next, theme toggle. */
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -23,7 +23,6 @@ function toSilhouette(sentence) {
   if (!sentence) return "";
   const words = sentence.split(/\s+/);
   const blocks = words.map(w => {
-    // count letters/numbers only for block count
     const count = (w.match(/[A-Za-z0-9]/g) || []).length;
     if (count === 0) return "■";
     return "■".repeat(count);
@@ -50,7 +49,6 @@ function reveal(on) {
 function next() { if (!cards.length) return; idx = (idx + 1) % cards.length; render(); }
 function prev() { if (!cards.length) return; idx = (idx - 1 + cards.length) % cards.length; render(); }
 
-// Pointer (touch/mouse/pen) hold-to-reveal
 ["pointerdown","keydown"].forEach(ev => tapArea.addEventListener(ev, (e) => {
   if (e.type === "keydown" && e.code !== "Space") return;
   reveal(true);
@@ -60,7 +58,6 @@ function prev() { if (!cards.length) return; idx = (idx - 1 + cards.length) % ca
   reveal(false);
 }));
 
-// Prevent accidental text selection / context menu
 tapArea.addEventListener("contextmenu", (e) => e.preventDefault());
 
 prevBtn.addEventListener("click", prev);
@@ -77,7 +74,6 @@ shuffleBtn.addEventListener("click", () => {
 });
 
 async function loadCards() {
-  // Try network first
   try {
     const res = await fetch("/api/cards", {cache: "no-store"});
     if (res.ok) {
@@ -91,7 +87,6 @@ async function loadCards() {
     }
     throw new Error("Bad response");
   } catch (e) {
-    // Offline fallback from localStorage
     cards = loadLocal("cards", []);
     if (!cards.length) {
       enSilEl.textContent = "오프라인: 저장된 문제가 없습니다.";
@@ -101,5 +96,36 @@ async function loadCards() {
     }
   }
 }
-
 loadCards();
+
+/* ---------- Theme handling (light/dark) ---------- */
+const themeBtn = document.getElementById("themeBtn");
+const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || (theme === "light" ? "#ffffff" : "#0c0c0c");
+  if (metaTheme) metaTheme.setAttribute("content", bg);
+  if (themeBtn) {
+    const next = theme === "light" ? "다크" : "라이트";
+    themeBtn.textContent = next;
+    themeBtn.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+    themeBtn.title = `테마 전환 (현재: ${theme === "light" ? "라이트" : "다크"})`;
+  }
+  try { localStorage.setItem("theme", theme); } catch {}
+}
+
+function initTheme() {
+  const saved = loadLocal("theme", null);
+  if (saved === "light" || saved === "dark") return applyTheme(saved);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(prefersDark ? "dark" : "light");
+}
+initTheme();
+
+if (themeBtn) {
+  themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    applyTheme(cur === "light" ? "dark" : "light");
+  });
+}
