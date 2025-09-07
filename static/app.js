@@ -47,7 +47,7 @@ function openSettings() {
   v_accent.value = toColor(getVar("--accent"));
   v_accent_fg.value = toColor(getVar("--accent-fg"));
   v_silhouette.value = toColor(getVar("--silhouette"));
-  v_block_x.value = parseFloat(getVar("--block-expand-x")) || 2;
+  v_block_x.value = parseFloat(getVar("--block-expand-x")) || 3;
   v_block_y.value = parseFloat(getVar("--block-expand-y")) || 0.05;
   settingsSheet.hidden = false;
 }
@@ -157,7 +157,7 @@ function layoutCover() {
     block.style.top = `${y}px`;
     block.style.width = `${width}px`;
     block.style.height = `${h}px`;
-    block.style.borderRadius = `${Math.round(h * 0.28)}px`;
+    block.style.borderRadius = `${Math.round(h * 0.25)}px`;
     coverEl.appendChild(block);
     maxBottom = Math.max(maxBottom, y + h);
   }

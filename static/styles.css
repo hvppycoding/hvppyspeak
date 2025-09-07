@@ -2,7 +2,7 @@
 :root {
   --radius: 16px;
   /* overlay expansion controls (user-adjustable) */
-  --block-expand-x: 2;   /* px */
+  --block-expand-x: 3;   /* px */
   --block-expand-y: 0.05;/* fraction of text height */
 }
 
