@@ -1,4 +1,4 @@
-/* v3.1: bigger overlay blocks, answer hidden by default, color controls, mobile fetch fixes */
+/* v3.1.2: 1/3 & 2/3 layout, tracking overlay, color controls, theme toggle, mobile API fixes */
 const $ = (sel) => document.querySelector(sel);
 
 const tapArea = $("#tapArea");
@@ -28,7 +28,8 @@ const settingsClose = $("#settingsClose");
 
 let cards = [];
 let idx = 0;
-// Global debounce timer (var avoids TDZ on early calls)
+
+// Global debounce timer (avoid TDZ)
 var resizeTimer = null;
 
 function saveLocal(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch(e){} }
@@ -40,7 +41,6 @@ function getVar(name) { return getComputedStyle(document.documentElement).getPro
 function setVar(name, val) { document.documentElement.style.setProperty(name, val); }
 
 function openSettings() {
-  // Pre-fill inputs with current values
   v_bg.value = toColor(getVar("--bg"));
   v_fg.value = toColor(getVar("--fg"));
   v_muted.value = toColor(getVar("--muted"));
@@ -51,14 +51,11 @@ function openSettings() {
   v_block_y.value = parseFloat(getVar("--block-expand-y")) || 0.05;
   settingsSheet.hidden = false;
 }
-
 function toColor(value) {
-  // Supports rgb/hex; best effort convert to hex for color input
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.fillStyle = value || "#000000";
   return ctx.fillStyle;
 }
-
 function saveSettings() {
   const kv = {
     "--bg": v_bg.value, "--fg": v_fg.value, "--muted": v_muted.value,
@@ -113,7 +110,6 @@ if (themeBtn) themeBtn.addEventListener("click", () => {
   const cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
   applyTheme(cur === "light" ? "dark" : "light");
 });
-
 if (settingsBtn) settingsBtn.addEventListener("click", openSettings);
 if (settingsSave) settingsSave.addEventListener("click", saveSettings);
 if (settingsReset) settingsReset.addEventListener("click", resetSettings);
@@ -137,7 +133,15 @@ function spanifyAnswer(text) {
 function layoutCover() {
   if (!enAnsEl.textContent.trim()) return;
   coverEl.innerHTML = "";
+
+  const areaRect = tapArea.getBoundingClientRect();
   const answerRect = enAnsEl.getBoundingClientRect();
+
+  // Position cover exactly over the answer block
+  coverEl.style.left = `${answerRect.left - areaRect.left}px`;
+  coverEl.style.top = `${answerRect.top - areaRect.top}px`;
+  coverEl.style.width = `${answerRect.width}px`;
+
   const words = enAnsEl.querySelectorAll(".word");
   const expandX = parseFloat(getVar("--block-expand-x")) || 0;
   const expandY = parseFloat(getVar("--block-expand-y")) || 0;
@@ -145,8 +149,8 @@ function layoutCover() {
   let maxBottom = 0;
   for (const w of words) {
     const r = w.getBoundingClientRect();
-    let left = r.left - answerRect.left - expandX;
-    let width = r.width + expandX * 2;
+    const left = (r.left - answerRect.left) - expandX;
+    const width = r.width + expandX * 2;
     const fullH = r.height;
     const h = Math.max(10, fullH * (1 + expandY));
     const y = (r.top - answerRect.top) - (h - fullH) / 2;
@@ -157,12 +161,14 @@ function layoutCover() {
     block.style.top = `${y}px`;
     block.style.width = `${width}px`;
     block.style.height = `${h}px`;
-    block.style.borderRadius = `${Math.round(h * 0.25)}px`;
+    block.style.borderRadius = `${Math.round(h * 0.28)}px`;
     coverEl.appendChild(block);
     maxBottom = Math.max(maxBottom, y + h);
   }
   coverEl.style.height = `${Math.ceil(maxBottom)}px`;
 }
+
+/* Render current card and build overlay */
 function render() {
   if (!cards.length) return;
   const c = cards[idx];
@@ -170,7 +176,7 @@ function render() {
   koEl.textContent = c.ko;
   posEl.textContent = idx + 1;
   totalEl.textContent = cards.length;
-  document.title = `영어 학습 ${idx+1}/${cards.length}`;
+  document.title = `hvppyspeak ${idx+1}/${cards.length}`;
   requestAnimationFrame(() => {
     layoutCover();
     requestAnimationFrame(layoutCover);
@@ -206,7 +212,6 @@ shuffleBtn.addEventListener("click", () => {
 });
 
 /* ---------- Relayout on env changes ---------- */
-
 function scheduleRelayout() {
   if (resizeTimer) clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => requestAnimationFrame(layoutCover), 150);
@@ -217,7 +222,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) sche
 
 /* ---------- Data loading (mobile fix + diagnostics) ---------- */
 async function loadCards() {
-  const url = `${location.origin}/api/cards`; // absolute URL guards against SW scope issues
+  const url = `${location.origin}/api/cards`;
   try {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -229,7 +234,6 @@ async function loadCards() {
       render();
       return;
     }
-    // If empty from server, still try local cache
     throw new Error("Empty cards from server");
   } catch (e) {
     console.warn("Failed to fetch /api/cards:", e);
@@ -239,14 +243,21 @@ async function loadCards() {
       posEl.textContent = 0; totalEl.textContent = 0;
       enAnsEl.textContent = ""; coverEl.innerHTML = ""; koEl.textContent = "";
     } else {
-      notice("오프라인 모드: 저장된 문제로 학습합니다.");
+      notice("오프라인 모드: 저장된 문제로 학습합니다.", { transient: true, duration: 3000 });
       render();
     }
   }
 }
-function notice(msg) {
+let noticeTimer = null;
+function hideNotice(){ if(!noticeEl) return; noticeEl.hidden = true; noticeEl.textContent=''; }
+function notice(msg, opts={}) {
   if (!noticeEl) return;
-  if (!msg) { noticeEl.hidden = true; noticeEl.textContent = ""; return; }
+  const { transient=false, duration=2500 } = opts;
+  if (!msg) { hideNotice(); return; }
   noticeEl.hidden = false; noticeEl.textContent = msg;
+  if (transient) {
+    if (noticeTimer) clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(hideNotice, duration);
+  }
 }
 loadCards();

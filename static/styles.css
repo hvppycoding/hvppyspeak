@@ -1,4 +1,4 @@
-/* v3.1: theme + overlay blocks + settings panel */
+/* v3.1.2: theme + overlay blocks + settings panel + 1/3 & 2/3 layout */
 :root {
   --radius: 16px;
   /* overlay expansion controls (user-adjustable) */
@@ -58,12 +58,17 @@ button { font: inherit; }
   padding: 8px 12px; border-radius: 14px;
 }
 
+/* Card area as a 3-row grid -> EN at 1/3, KO at 2/3 */
 .card-area {
-  display: grid; place-items: center; text-align: center;
-  padding: 8vh 16px;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
+  place-items: center;
+  padding: 6vh 16px;
   -webkit-tap-highlight-color: transparent;
   user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   position: relative;
+  overflow: visible;
 }
 
 /* English answer: hidden by default, shown on hold */
@@ -76,22 +81,29 @@ button { font: inherit; }
   transition: opacity 0.12s ease;
 }
 .answer {
-  position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 92%;
-  z-index: 1; opacity: 0;
+  grid-row: 1; grid-column: 1;
+  position: relative;
+  width: min(92%, 1000px);
+  margin: 0 auto;
+  opacity: 0;
+  text-align: center;
 }
 .reveal .answer { opacity: 1; }
 
-/* Korean under the answer */
+/* Korean under the answer, placed at row 3 (≈ 2/3 of the screen within card area) */
 .korean {
-  margin-top: 22vh;
+  grid-row: 3; grid-column: 1;
+  width: min(92%, 1000px);
+  text-align: center;
   font-size: clamp(18px, 4vw, 26px);
   color: var(--muted);
   white-space: pre-wrap;
+  margin: 0;
 }
 
-/* Overlay that covers words with rounded rectangles */
+/* Overlay that covers words with rounded rectangles; positioned by JS to follow .answer */
 .cover {
-  position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 92%;
+  position: absolute;
   z-index: 2; pointer-events: none;
   transition: opacity 0.12s ease;
 }
@@ -102,12 +114,21 @@ button { font: inherit; }
 }
 .reveal .cover { opacity: 0; }
 
-/* Notice for errors */
+/* Notice (toast style, bottom and non-blocking) */
 .notice {
-  position: absolute; inset: 20% 10% auto 10%;
-  background: rgba(0,0,0,0.5);
-  color: #fff; padding: 12px 14px; border-radius: 12px;
-  text-align: left; font-size: 14px;
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 16px);
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+  max-width: min(92vw, 600px);
+  z-index: 5;
+  pointer-events: none; /* never block taps */
 }
 
 /* Settings sheet */

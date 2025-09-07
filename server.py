@@ -1,4 +1,4 @@
-# server.py (v3.1)
+# server.py (v3.1.2)
 import csv, io, os, hashlib
 from typing import List, Dict
 from fastapi import FastAPI
@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-app = FastAPI(title="English Trainer v3.1")
+app = FastAPI(title="English Trainer v3.1.2")
 
 CARDS: List[Dict[str, str]] = []
 CSV_PATH = os.environ.get("CSV_PATH", "data/cards.csv")
@@ -55,8 +55,6 @@ def load_cards(path: str):
 def startup():
     global CARDS
     CARDS = load_cards(CSV_PATH)
-    print(f"Loaded {len(CARDS)} cards from {CSV_PATH}, ETAG={ETAG}")
-    print(CARDS)
 
 @app.get("/api/cards")
 def get_cards():
