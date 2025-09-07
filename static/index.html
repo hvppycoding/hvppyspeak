@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>영어 학습 (Hold-to-Reveal)</title>
+  <title>영어 학습 v3.1 (Overlay Reveal)</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#111111"/>
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -18,13 +18,15 @@
       <div class="toolbar">
         <button id="shuffleBtn" class="ghost">셔플</button>
         <button id="themeBtn" class="ghost" aria-pressed="false" aria-label="테마 전환">라이트</button>
+        <button id="settingsBtn" class="ghost" aria-label="색상 설정">색상</button>
       </div>
     </header>
 
     <main id="tapArea" class="card-area" tabindex="0" aria-label="정답 보기 영역(터치&홀드)">
-      <div id="englishSilhouette" class="english silhouette" aria-hidden="true">…</div>
+      <div id="cover" class="cover" aria-hidden="true"></div>
       <div id="englishAnswer" class="english answer" aria-live="polite"></div>
       <div id="korean" class="korean"></div>
+      <div id="notice" class="notice" hidden></div>
     </main>
 
     <footer class="bottombar">
@@ -32,6 +34,28 @@
       <div class="status"><span id="pos">0</span>/<span id="total">0</span></div>
       <button id="nextBtn" class="nav">다음</button>
     </footer>
+
+    <!-- Settings sheet -->
+    <section id="settingsSheet" class="sheet" hidden aria-modal="true" role="dialog" aria-label="색상 설정">
+      <div class="sheet-inner">
+        <h2>색상/가림 옵션</h2>
+        <div class="grid">
+          <label>배경(bg) <input type="color" id="v_bg"></label>
+          <label>글자(fg) <input type="color" id="v_fg"></label>
+          <label>보조(muted) <input type="color" id="v_muted"></label>
+          <label>버튼(accent) <input type="color" id="v_accent"></label>
+          <label>버튼글(accent-fg) <input type="color" id="v_accent_fg"></label>
+          <label>가림색(silhouette) <input type="color" id="v_silhouette"></label>
+          <label>가로 여유(px) <input type="number" id="v_block_x" step="1" min="0"></label>
+          <label>세로 비율(0~0.8) <input type="number" id="v_block_y" step="0.05" min="0" max="0.8"></label>
+        </div>
+        <div class="sheet-actions">
+          <button id="settingsSave" class="nav">저장</button>
+          <button id="settingsReset" class="ghost">초기화</button>
+          <button id="settingsClose" class="ghost">닫기</button>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="/app.js"></script>

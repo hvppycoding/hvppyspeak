@@ -1,6 +1,9 @@
-/* Mobile-first, tap-friendly styles with theme support */
+/* v3.1: theme + overlay blocks + settings panel */
 :root {
   --radius: 16px;
+  /* overlay expansion controls (user-adjustable) */
+  --block-expand-x: 2;   /* px */
+  --block-expand-y: 0.05;/* fraction of text height */
 }
 
 /* Dark theme (default) */
@@ -9,11 +12,11 @@
   --bg: #0c0c0c;
   --fg: #f3f3f3;
   --muted: #adadad;
-  --accent: #2dd4bf;     /* teal button */
-  --accent-fg: #04110f;  /* button text on dark */
+  --accent: #2dd4bf;
+  --accent-fg: #04110f;
   --bar: rgba(255,255,255,0.04);
   --shadow: 0 6px 20px rgba(45,212,191,0.25);
-  --silhouette: var(--muted); /* silhouette color close to Korean text */
+  --silhouette: #4a4a4a;
 }
 
 /* Light theme */
@@ -21,11 +24,11 @@
   --bg: #ffffff;
   --fg: #0b0b0b;
   --muted: #4b5563;
-  --accent: #2563eb;     /* blue button */
-  --accent-fg: #ffffff;  /* button text on light */
+  --accent: #2563eb;
+  --accent-fg: #ffffff;
   --bar: rgba(0,0,0,0.04);
   --shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
-  --silhouette: var(--muted);
+  --silhouette: #969aa2;
 }
 
 * { box-sizing: border-box; }
@@ -63,6 +66,7 @@ button { font: inherit; }
   position: relative;
 }
 
+/* English answer: hidden by default, shown on hold */
 .english {
   font-weight: 700;
   line-height: 1.25;
@@ -71,18 +75,51 @@ button { font: inherit; }
   white-space: pre-wrap;
   transition: opacity 0.12s ease;
 }
-/* Silhouette now uses a theme variable so it stays visible on both themes */
-.silhouette { color: var(--silhouette); text-shadow: 0 0 0 var(--silhouette); }
-.answer { position: absolute; opacity: 0; top: 12%; left: 50%; transform: translateX(-50%); width: 92%; }
+.answer {
+  position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 92%;
+  z-index: 1; opacity: 0;
+}
 .reveal .answer { opacity: 1; }
-.reveal .silhouette { opacity: 0; }
 
+/* Korean under the answer */
 .korean {
   margin-top: 22vh;
   font-size: clamp(18px, 4vw, 26px);
   color: var(--muted);
   white-space: pre-wrap;
 }
+
+/* Overlay that covers words with rounded rectangles */
+.cover {
+  position: absolute; top: 12%; left: 50%; transform: translateX(-50%); width: 92%;
+  z-index: 2; pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+.cover .block {
+  position: absolute;
+  background: var(--silhouette);
+  border-radius: 12px; /* base; refined per-block in JS */
+}
+.reveal .cover { opacity: 0; }
+
+/* Notice for errors */
+.notice {
+  position: absolute; inset: 20% 10% auto 10%;
+  background: rgba(0,0,0,0.5);
+  color: #fff; padding: 12px 14px; border-radius: 12px;
+  text-align: left; font-size: 14px;
+}
+
+/* Settings sheet */
+.sheet[hidden] { display: none; }
+.sheet { position: fixed; inset: auto 0 0 0; background: var(--bg); border-top-left-radius: 16px; border-top-right-radius: 16px; box-shadow: 0 -8px 24px rgba(0,0,0,0.25); }
+.sheet-inner { padding: 14px 16px 18px; }
+.sheet h2 { margin: 0 0 10px; font-size: 18px; }
+.sheet .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+.sheet label { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.sheet input[type="color"] { width: 48px; height: 28px; padding: 0; border: 0; background: none; }
+.sheet input[type="number"] { width: 80px; }
+.sheet .sheet-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
 
 .bottombar .nav {
   background: var(--accent); color: var(--accent-fg); border: none; border-radius: 16px; padding: 12px 18px; font-weight: 700;
